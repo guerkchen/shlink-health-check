@@ -2,7 +2,7 @@
   "name": "shlink-health-check",
   "version": "1.0.0",
   "description": "periodic health check of shlink instance and logging to telegram bot",
-  "main": "index.js",
+  "main": "src/functions/index.js",
   "scripts": {
   },
   "repository": {

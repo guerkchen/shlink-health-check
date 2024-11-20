@@ -8,6 +8,8 @@ const greenCheck = '\u2705'; // ✅
 const redCross = '\u274C';  // ❌
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 
+var firstRun = true
+
 function telegramMessage(msg){
     bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg)
 }
@@ -34,13 +36,15 @@ async function healthCheck(){
     const data = await fetchData(url)
     if(data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io"){
         console.log(`shlink health check passed`)
-        if (now.getDay() === 1 && now.getHours() === 12) { // "i am still alive" once a week
+        if (firstRun || (now.getDay() === 1 && now.getHours() === 12)) { // "i am still alive" once a week
             telegramMessage(`${greenCheck} weekly update: shlink health check passed`)
         }
     } else {
         console.error(`error health check ${data}`)
         telegramMessag(`${redCross} error health check`)
     }
+
+    firstRun = false
 }
 
 app.timer("shlink-health-check", {
