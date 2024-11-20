@@ -36,7 +36,7 @@ async function healthCheck(){
     const data = await fetchData(url)
     if(data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io"){
         console.log(`shlink health check passed`)
-        if (firstRun || (now.getDay() === 1 && now.getHours() === 12)) { // "i am still alive" once a week
+        if (firstRun || (now.getDay() === 3 && now.getHours() === 15)) { // "i am still alive" once a week
             telegramMessage(`${greenCheck} weekly update: shlink health check passed`)
         }
     } else {

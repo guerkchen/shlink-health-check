@@ -129,7 +129,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-.funcignore
 *.js.map
 *.ts
 .git*
