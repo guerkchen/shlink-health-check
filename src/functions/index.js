@@ -92,34 +92,12 @@ async function healthCheck() {
     updateLastCodeGreen()
 }
 
-// app.timer("shlink-health-check", {
-//     schedule: '0 0 * * * *',
-//     handler: (myTimer, context) => {
-//         context.log("beginnen health check on shlink")
-//         healthCheck()
-//     }
-// })
+app.timer("shlink-health-check", {
+    schedule: '0 0 * * * *',
+    handler: (myTimer, context) => {
+        context.log("beginnen health check on shlink")
+        healthCheck()
+    }
+})
 
 healthCheck()
-
-// async function test() {
-//     var response;
-//     try {
-//         response = await axios({
-//             url: `https://s.khs-lgz.de/test1`,
-//             method: `get`,
-//             timeout: 20000,
-//             maxRedirects: 0,
-//             validateStatus: (status) =>
-//                 status >= 200 && status < 400,
-//         })
-
-//         console.log(response.status)
-//         console.log(response.headers.location)
-//     } catch (error) {
-//         console.error(`cannot fetch data from url`)
-//         console.error(error)
-//     }
-// }
-
-// test()
