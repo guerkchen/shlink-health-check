@@ -98,5 +98,3 @@ app.timer("shlink-health-check", {
         healthCheck()
     }
 })
-
-healthCheck()
