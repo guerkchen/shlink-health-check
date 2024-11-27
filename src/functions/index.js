@@ -95,6 +95,6 @@ app.timer("shlink-health-check", {
     handler: (myTimer, ctx) => {
         context = ctx
         context.log("beginnen health check on shlink")
-        await healthCheck()
+        healthCheck()
     }
 })
