@@ -13,7 +13,7 @@ const redirectTable = JSON.parse(process.env.SHLINK_REDIRECT_TABLE)
 var lastCodeGreen = 0;
 
 function telegramMessage(msg) {
-    bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg)
+    bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg, { disable_web_page_preview: true })
 }
 
 function errorLog(msg, error = null) {
