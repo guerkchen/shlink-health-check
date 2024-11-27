@@ -11,20 +11,21 @@ const serverUrl = process.env.SHLINK_URL
 const redirectTable = JSON.parse(process.env.SHLINK_REDIRECT_TABLE)
 
 var lastCodeGreen = 0;
+var context = null;
 
 function telegramMessage(msg) {
     bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg, { disable_web_page_preview: true })
 }
 
 function errorLog(msg, error = null) {
-    console.error(msg)
+    context.error(msg)
     if (error)
         console.error(error)
     telegramMessage(`${redCross} ${msg}`)
 }
 
 function msgLog(msg) {
-    console.log(msg)
+    context.log(msg)
     if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
         telegramMessage(`${greenCheck} ${msg}`)
     }
@@ -38,7 +39,6 @@ function updateLastCodeGreen() {
 }
 
 async function axiosGet(requestUrl) {
-    console.log(`axios.get ${requestUrl}`)
     return await axios({
         url: requestUrl,
         method: `get`,
@@ -50,7 +50,6 @@ async function axiosGet(requestUrl) {
 }
 
 async function checkRedirectTable() {
-    console.log(`checkRedirectTable`)
     for (const entry of redirectTable) {
         const url = serverUrl + "/" + entry.suffix
         try {
@@ -70,7 +69,6 @@ async function checkRedirectTable() {
 }
 
 async function checkShlinkStatus() {
-    console.log(`checkShlinkStatus`)
     const url = serverUrl + "/rest/health"
     try {
         const response = await axiosGet(url)
@@ -94,7 +92,8 @@ async function healthCheck() {
 
 app.timer("shlink-health-check", {
     schedule: '0 0 * * * *',
-    handler: (myTimer, context) => {
+    handler: (myTimer, ctx) => {
+        context = ctx
         context.log("beginnen health check on shlink")
         healthCheck()
     }
