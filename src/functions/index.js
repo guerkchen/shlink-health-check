@@ -18,9 +18,9 @@ function telegramMessage(msg) {
 }
 
 function errorLog(msg, error = null) {
-    context.error(msg)
+    context.log(msg)
     if (error)
-        console.error(error)
+        context.log(error)
     telegramMessage(`${redCross} ${msg}`)
 }
 
@@ -95,6 +95,6 @@ app.timer("shlink-health-check", {
     handler: (myTimer, ctx) => {
         context = ctx
         context.log("beginnen health check on shlink")
-        healthCheck()
+        await healthCheck()
     }
 })
