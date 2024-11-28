@@ -11,21 +11,20 @@ const serverUrl = process.env.SHLINK_URL
 const redirectTable = JSON.parse(process.env.SHLINK_REDIRECT_TABLE)
 
 var lastCodeGreen = 0;
-var context = null;
 
 function telegramMessage(msg) {
     bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg, { disable_web_page_preview: true })
 }
 
-function errorLog(msg, error = null) {
-    context.log(msg)
+function errorLog(ctx, msg, error = null) {
+    ctx.log(msg)
     if (error)
-        context.log(error)
+        ctx.log(error)
     telegramMessage(`${redCross} ${msg}`)
 }
 
-function msgLog(msg) {
-    context.log(msg)
+function msgLog(ctx, msg) {
+    ctx.log(msg)
     if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
         telegramMessage(`${greenCheck} ${msg}`)
     }
@@ -49,52 +48,51 @@ async function axiosGet(requestUrl) {
     })
 }
 
-async function checkRedirectTable() {
+async function checkRedirectTable(ctx) {
     for (const entry of redirectTable) {
         const url = serverUrl + "/" + entry.suffix
         try {
             const response = await axiosGet(serverUrl + "/" + entry.suffix)
 
             if (response.status == 302 && response.headers.location == entry.redirect) {
-                msgLog(`successful checked url ${url} -> ${entry.redirect}`)
+                msgLog(ctx, `successful checked url ${url} -> ${entry.redirect}`)
             } else {
-                errorLog(`error checking url ${url}`)
-                errorLog(`response status = ${response.status}`)
-                errorLog(`${response.headers.location} ?= ${entry.redirect}`)
+                errorLog(ctx, `error checking url ${url}`)
+                errorLog(ctx, `response status = ${response.status}`)
+                errorLog(ctx, `${response.headers.location} ?= ${entry.redirect}`)
             }
         } catch (error) {
-            errorLog(`error fetch url ${url}`, error)
+            errorLog(ctx, `error fetch url ${url}`, error)
         }
     }
 }
 
-async function checkShlinkStatus() {
+async function checkShlinkStatus(ctx) {
     const url = serverUrl + "/rest/health"
     try {
         const response = await axiosGet(url)
         const data = response.data
 
         if (data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io") {
-            msgLog(`shlink health check passed`)
+            msgLog(ctx, `shlink health check passed`)
         } else {
-            errorLog(`error shlink health check`)
+            errorLog(ctx, `error shlink health check`)
         }
     } catch (error) {
-        errorLog(`error fetch url ${url}`, error)
+        errorLog(ctx, `error fetch url ${url}`, error)
     }
 }
 
-async function healthCheck() {
-    await checkShlinkStatus()
-    await checkRedirectTable()
+async function healthCheck(ctx) {
+    await checkShlinkStatus(ctx)
+    await checkRedirectTable(ctx)
     updateLastCodeGreen()
 }
 
 app.timer("shlink-health-check", {
     schedule: '0 0 * * * *',
     handler: (myTimer, ctx) => {
-        context = ctx
-        context.log("beginnen health check on shlink")
-        healthCheck()
+        ctx.log("beginnen health check on shlink")
+        healthCheck(ctx)
     }
 })
