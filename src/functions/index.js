@@ -91,8 +91,8 @@ async function healthCheck(ctx) {
 
 app.timer("shlink-health-check", {
     schedule: '0 0 * * * *',
-    handler: (myTimer, ctx) => {
+    handler: async (myTimer, ctx) => {
         ctx.log("beginnen health check on shlink")
-        healthCheck(ctx)
+        await healthCheck(ctx)
     }
 })
