@@ -93,6 +93,9 @@ app.timer("shlink-health-check", {
     schedule: '0 0 * * * *',
     handler: async (myTimer, ctx) => {
         ctx.log("beginnen health check on shlink")
+        ctx.log(`lastCodeGreen ${lastCodeGreen}`)
+        ctx.log("Date.now() " + Date.now())
+        ctx.log("process.env.TELEGRAM_CODE_GREEN_CYCLE " + process.env.TELEGRAM_CODE_GREEN_CYCLE)
         await healthCheck(ctx)
     }
 })
