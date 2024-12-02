@@ -23,17 +23,22 @@ async function errorLog(ctx, msg, error = null) {
     await telegramMessage(`${redCross} ${msg}`)
 }
 
-async function msgLog(ctx, msg) {
+async function msgLog(ctx, msg, telegram = false) {
     ctx.log(msg)
-    if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
+    if (telegram) {
         await telegramMessage(`${greenCheck} ${msg}`)
     }
 
 }
 
-function updateLastCodeGreen() {
+function updateLastCodeGreen(ctx) {
     if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
         lastCodeGreen = Date.now()
+        ctx.log("send code green")
+        return true
+    } else {
+        ctx.log("skip sending code green")
+        return false
     }
 }
 
@@ -48,14 +53,14 @@ async function axiosGet(requestUrl) {
     })
 }
 
-async function checkRedirectTable(ctx) {
+async function checkRedirectTable(ctx, telegram = false) {
     for (const entry of redirectTable) {
         const url = serverUrl + "/" + entry.suffix
         try {
             const response = await axiosGet(serverUrl + "/" + entry.suffix)
 
             if (response.status == 302 && response.headers.location == entry.redirect) {
-                await msgLog(ctx, `successful checked url ${url} -> ${entry.redirect}`)
+                await msgLog(ctx, `successful checked url ${url} -> ${entry.redirect}`, telegram)
             } else {
                 await errorLog(ctx, `error checking url ${url}`)
                 await errorLog(ctx, `response status = ${response.status}`)
@@ -67,14 +72,14 @@ async function checkRedirectTable(ctx) {
     }
 }
 
-async function checkShlinkStatus(ctx) {
+async function checkShlinkStatus(ctx, telegram = false) {
     const url = serverUrl + "/rest/health"
     try {
         const response = await axiosGet(url)
         const data = response.data
 
         if (data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io") {
-            await msgLog(ctx, `shlink health check passed`)
+            await msgLog(ctx, `shlink health check passed`, telegram)
         } else {
             await errorLog(ctx, `error shlink health check`)
         }
@@ -83,19 +88,15 @@ async function checkShlinkStatus(ctx) {
     }
 }
 
-async function healthCheck(ctx) {
-    await checkShlinkStatus(ctx)
-    await checkRedirectTable(ctx)
-    updateLastCodeGreen()
+async function healthCheck(ctx, telegram = false) {
+    await checkShlinkStatus(ctx, telegram)
+    await checkRedirectTable(ctx, telegram)
 }
 
 app.timer("shlink-health-check", {
     schedule: '0 0 * * * *',
     handler: async (myTimer, ctx) => {
         ctx.log("beginnen health check on shlink")
-        ctx.log(`lastCodeGreen ${lastCodeGreen}`)
-        ctx.log("Date.now() " + Date.now())
-        ctx.log("process.env.TELEGRAM_CODE_GREEN_CYCLE " + process.env.TELEGRAM_CODE_GREEN_CYCLE)
-        await healthCheck(ctx)
+        await healthCheck(ctx, updateLastCodeGreen(ctx))
     }
 })
