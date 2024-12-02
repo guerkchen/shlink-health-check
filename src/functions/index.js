@@ -12,21 +12,21 @@ const redirectTable = JSON.parse(process.env.SHLINK_REDIRECT_TABLE)
 
 var lastCodeGreen = 0;
 
-function telegramMessage(msg) {
+async function telegramMessage(msg) {
     await bot.sendMessage(process.env.TELEGRAM_GROUP_ID, msg, { disable_web_page_preview: true })
 }
 
-function errorLog(ctx, msg, error = null) {
+async function errorLog(ctx, msg, error = null) {
     ctx.log(msg)
     if (error)
         ctx.log(error)
-    telegramMessage(`${redCross} ${msg}`)
+    await telegramMessage(`${redCross} ${msg}`)
 }
 
-function msgLog(ctx, msg) {
+async function msgLog(ctx, msg) {
     ctx.log(msg)
     if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
-        telegramMessage(`${greenCheck} ${msg}`)
+        await telegramMessage(`${greenCheck} ${msg}`)
     }
 
 }
@@ -55,14 +55,14 @@ async function checkRedirectTable(ctx) {
             const response = await axiosGet(serverUrl + "/" + entry.suffix)
 
             if (response.status == 302 && response.headers.location == entry.redirect) {
-                msgLog(ctx, `successful checked url ${url} -> ${entry.redirect}`)
+                await msgLog(ctx, `successful checked url ${url} -> ${entry.redirect}`)
             } else {
-                errorLog(ctx, `error checking url ${url}`)
-                errorLog(ctx, `response status = ${response.status}`)
-                errorLog(ctx, `${response.headers.location} ?= ${entry.redirect}`)
+                await errorLog(ctx, `error checking url ${url}`)
+                await errorLog(ctx, `response status = ${response.status}`)
+                await errorLog(ctx, `${response.headers.location} ?= ${entry.redirect}`)
             }
         } catch (error) {
-            errorLog(ctx, `error fetch url ${url}`, error)
+            await errorLog(ctx, `error fetch url ${url}`, error)
         }
     }
 }
@@ -74,12 +74,12 @@ async function checkShlinkStatus(ctx) {
         const data = response.data
 
         if (data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io") {
-            msgLog(ctx, `shlink health check passed`)
+            await msgLog(ctx, `shlink health check passed`)
         } else {
-            errorLog(ctx, `error shlink health check`)
+            await errorLog(ctx, `error shlink health check`)
         }
     } catch (error) {
-        errorLog(ctx, `error fetch url ${url}`, error)
+        await errorLog(ctx, `error fetch url ${url}`, error)
     }
 }
 
