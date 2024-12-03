@@ -33,11 +33,21 @@ async function msgLog(ctx, msg, telegram = false) {
 
 function updateLastCodeGreen(ctx) {
     if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
-        lastCodeGreen = Date.now()
+        
         ctx.log("send code green")
+        ctx.log(`lastCodeGreen ${lastCodeGreen}`)
+        ctx.log("Date.now() " + Date.now())
+        ctx.log("process.env.TELEGRAM_CODE_GREEN_CYCLE " + process.env.TELEGRAM_CODE_GREEN_CYCLE)
+        
+        lastCodeGreen = Date.now()
         return true
     } else {
+        
         ctx.log("skip sending code green")
+        ctx.log(`lastCodeGreen ${lastCodeGreen}`)
+        ctx.log("Date.now() " + Date.now())
+        ctx.log("process.env.TELEGRAM_CODE_GREEN_CYCLE " + process.env.TELEGRAM_CODE_GREEN_CYCLE)
+        
         return false
     }
 }
