@@ -32,7 +32,7 @@ async function msgLog(ctx, msg, telegram = false) {
 }
 
 function updateLastCodeGreen(ctx) {
-    if (lastCodeGreen + process.env.TELEGRAM_CODE_GREEN_CYCLE < Date.now()) {
+    if (parseInt(lastCodeGreen) + parseInt(process.env.TELEGRAM_CODE_GREEN_CYCLE) < parseInt(Date.now())) {
         
         ctx.log("send code green")
         ctx.log(`lastCodeGreen ${lastCodeGreen}`)
