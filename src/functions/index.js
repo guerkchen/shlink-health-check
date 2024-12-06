@@ -302,7 +302,7 @@ async function healthCheck(ctx) {
 }
 
 app.timer("shlink-health-check", {
-    schedule: '0 0 * * * *',
+    schedule: '0 */5 * * * *',
     handler: async (myTimer, ctx) => {
         await ctx.log("beginnen health check on shlink")
         await healthCheck(ctx)
