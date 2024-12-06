@@ -218,7 +218,7 @@ async function getNewForward(ctx) {
                 }
             }
         } catch (error) {
-            await errorLog(ctx, `error getNewForward fetch ${url}`, error)
+            await errorLog(ctx, `error getNewForward fetch ${requestUrl}`, error)
         }
     }
 
