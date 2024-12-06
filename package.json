@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "periodic health check of shlink instance and logging to telegram bot",
   "main": "src/functions/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/guerkchen/shlink-health-check.git"
@@ -16,6 +15,7 @@
   },
   "homepage": "https://github.com/guerkchen/shlink-health-check#readme",
   "dependencies": {
+    "@azure/data-tables": "^13.3.0",
     "@azure/functions": "^4.6.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
