@@ -302,7 +302,7 @@ async function healthCheck(ctx) {
 }
 
 app.timer("shlink-health-check", {
-    schedule: '0 */5 * * * *',
+    schedule: process.env.AZURE_CRON_TIMER,
     handler: async (myTimer, ctx) => {
         await ctx.log("beginnen health check on shlink")
         await healthCheck(ctx)
