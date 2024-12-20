@@ -229,7 +229,7 @@ async function checkRedirect(ctx, shortUrl, longUrl, telegram = false) {
     // check for correct forwarding
     try {
         const response = await axios({
-            url: shortUrl,
+            url: shortUrl + "?notrack=1", // disable tracking of health check calls
             method: `get`,
             timeout: 20000,
             maxRedirects: 0,
