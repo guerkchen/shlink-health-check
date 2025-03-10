@@ -253,7 +253,7 @@ async function checkRedirect(ctx, shortUrl, longUrl, telegram = false) {
             method: `get`,
             timeout: 20000,
             validateStatus: (status) =>
-                status >= 200 && status < 300 || status == 403, // some website prohibit searching with axios, so unfortunately we must accept 403 here
+                status >= 200 && status < 300 || status == 403 || status == 429, // some website prohibit searching with axios, so unfortunately we must accept 403 here
         })
 
         await msgLog(ctx, `successful reached ${longUrl}`, telegram)
