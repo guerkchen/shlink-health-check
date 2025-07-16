@@ -183,13 +183,26 @@ async function compareAndReplaceOldForward(ctx, newForward, telegram = false) {
     }
 }
 
+async function axiosWithRetry(config, retries = 3, delay = 1000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            return await axios(config);
+        } catch (error) {
+            if (attempt === retries) {
+                throw error;
+            }
+            await new Promise(resolve => setTimeout(resolve, delay)); // wait before retrying
+        }
+    }
+}
+
 async function getNewForward(ctx) {
     var newForward = {}
     var currentPage = 1
     while (true) { // break when last page is parsed
         const requestUrl = process.env.SHLINK_URL + `/rest/v3/short-urls?page=${currentPage}&itemsPerPage=10&tags%5B%5D=use%3Aprod&tagsMode=all`
         try {
-            const response = await axios({
+            const response = await axiosWithRetry({
                 url: requestUrl,
                 headers: {
                     'accept': 'application/json',
@@ -197,7 +210,7 @@ async function getNewForward(ctx) {
                 },
                 method: `get`,
                 timeout: 20000
-            })
+            });
             const data = response.data
             if (data.shortUrls == null || data.shortUrls.data == null || data.shortUrls.pagination == null || data.shortUrls.pagination.pagesCount == null) { // check for valid data
                 await errorLog(ctx, "error get list of urls", data)
@@ -228,14 +241,14 @@ async function getNewForward(ctx) {
 async function checkRedirect(ctx, shortUrl, longUrl, telegram = false) {
     // check for correct forwarding
     try {
-        const response = await axios({
+        const response = await axiosWithRetry({
             url: shortUrl + "?notrack=1", // disable tracking of health check calls
             method: `get`,
             timeout: 20000,
             maxRedirects: 0,
             validateStatus: (status) =>
                 status >= 200 && status < 400,
-        })
+        });
 
         if (response.status == 302 && response.headers.location == longUrl) {
             await msgLog(ctx, `successful checked url ${shortUrl} -> ${longUrl}`, telegram)
@@ -248,13 +261,13 @@ async function checkRedirect(ctx, shortUrl, longUrl, telegram = false) {
 
     // check forwarding to be reachable
     try {
-        await axios({
+        await axiosWithRetry({
             url: longUrl,
             method: `get`,
             timeout: 20000,
             validateStatus: (status) =>
                 status >= 200 && status < 300 || status == 403 || status == 429, // some website prohibit searching with axios, so unfortunately we must accept 403 here
-        })
+        });
 
         await msgLog(ctx, `successful reached ${longUrl}`, telegram)
     } catch (error) {
@@ -271,11 +284,11 @@ async function checkRedirects(ctx, newForward, telegram) {
 async function checkShlinkStatus(ctx, telegram = false) {
     const healthUrl = process.env.SHLINK_URL + "/rest/health"
     try {
-        const response = await axios({
+        const response = await axiosWithRetry({
             url: healthUrl,
             method: `get`,
             timeout: 20000,
-        })
+        });
         const data = response.data
 
         if (data != null && data.status == "pass" && data.links != null && data.links.about == "https://shlink.io") {
